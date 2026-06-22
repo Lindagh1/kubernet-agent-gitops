@@ -1,0 +1,18 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerBinding
+metadata:
+  name: ai-agent-github-binding
+  namespace: wksp-user1-cicd
+  labels:
+    app.kubernetes.io/name: ai-agent
+    app.kubernetes.io/part-of: openshift-ai-agent
+spec:
+  params:
+    - name: git-url
+      value: $(body.repository.clone_url)
+
+    - name: git-revision
+      value: $(body.after)
+
+    - name: git-ref
+      value: $(body.ref)
