@@ -1,0 +1,58 @@
+apiVersion: triggers.tekton.dev/v1beta1
+kind: TriggerTemplate
+metadata:
+  name: ai-agent-build-template
+  namespace: wksp-user1-cicd
+  labels:
+    app.kubernetes.io/name: ai-agent
+    app.kubernetes.io/part-of: openshift-ai-agent
+spec:
+  params:
+    - name: git-url
+      description: Git repository URL
+
+    - name: git-revision
+      description: Exact Git commit SHA
+
+    - name: git-ref
+      description: Git reference such as refs/heads/main
+
+  resourceTemplates:
+    - apiVersion: tekton.dev/v1
+      kind: PipelineRun
+      metadata:
+        generateName: ai-agent-build-
+        namespace: wksp-user1-cicd
+        labels:
+          app.kubernetes.io/name: ai-agent
+          app.kubernetes.io/part-of: openshift-ai-agent
+          app.kubernetes.io/managed-by: tekton
+        annotations:
+          ai-agent/git-ref: $(tt.params.git-ref)
+          ai-agent/git-revision: $(tt.params.git-revision)
+      spec:
+        pipelineRef:
+          name: ai-agent-build
+
+        taskRunTemplate:
+          serviceAccountName: pipeline
+
+        params:
+          - name: GIT_URL
+            value: $(tt.params.git-url)
+
+          - name: GIT_REVISION
+            value: $(tt.params.git-revision)
+
+          - name: IMAGE
+            value: image-registry.openshift-image-registry.svc:5000/wksp-user1-dev/ai-agent:$(tt.params.git-revision)
+
+        workspaces:
+          - name: shared-workspace
+            volumeClaimTemplate:
+              spec:
+                accessModes:
+                  - ReadWriteOnce
+                resources:
+                  requests:
+                    storage: 1Gi
