@@ -3,16 +3,18 @@ kind: Deployment
 metadata:
   name: ai-agent
   labels:
+    app: ai-agent
     app.kubernetes.io/name: ai-agent
     app.kubernetes.io/part-of: openshift-ai-agent
 spec:
   replicas: 1
   selector:
     matchLabels:
-      app.kubernetes.io/name: ai-agent
+      app: ai-agent
   template:
     metadata:
       labels:
+        app: ai-agent
         app.kubernetes.io/name: ai-agent
         app.kubernetes.io/part-of: openshift-ai-agent
     spec:
