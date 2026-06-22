@@ -1,0 +1,93 @@
+apiVersion: tekton.dev/v1
+kind: Pipeline
+metadata:
+  name: ai-agent-build
+  namespace: wksp-user1-cicd
+  labels:
+    app.kubernetes.io/name: ai-agent
+    app.kubernetes.io/part-of: openshift-ai-agent
+spec:
+  description: Clone and build the OpenShift AI agent with S2I.
+
+  params:
+    - name: GIT_URL
+      type: string
+      default: https://github.com/Lindagh1/kubernet-agent.git
+
+    - name: GIT_REVISION
+      type: string
+      default: main
+
+    - name: IMAGE
+      type: string
+      default: image-registry.openshift-image-registry.svc:5000/wksp-user1-dev/ai-agent:pipeline-latest
+
+  workspaces:
+    - name: shared-workspace
+      description: Shared workspace containing the cloned source code.
+
+  tasks:
+    - name: clone-source
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: git-clone
+          - name: namespace
+            value: openshift-pipelines
+      params:
+        - name: URL
+          value: $(params.GIT_URL)
+        - name: REVISION
+          value: $(params.GIT_REVISION)
+        - name: DELETE_EXISTING
+          value: "true"
+        - name: SUBMODULES
+          value: "false"
+        - name: DEPTH
+          value: "1"
+      workspaces:
+        - name: output
+          workspace: shared-workspace
+
+    - name: build-image
+      runAfter:
+        - clone-source
+      taskRef:
+        resolver: cluster
+        params:
+          - name: kind
+            value: task
+          - name: name
+            value: s2i-python
+          - name: namespace
+            value: openshift-pipelines
+      params:
+        - name: IMAGE
+          value: $(params.IMAGE)
+        - name: VERSION
+          value: "3.12-ubi9"
+        - name: CONTEXT
+          value: "."
+        - name: STORAGE_DRIVER
+          value: vfs
+        - name: FORMAT
+          value: oci
+        - name: TLS_VERIFY
+          value: "true"
+        - name: SKIP_PUSH
+          value: "false"
+      workspaces:
+        - name: source
+          workspace: shared-workspace
+
+  results:
+    - name: IMAGE_URL
+      description: Fully qualified image name.
+      value: $(tasks.build-image.results.IMAGE_URL)
+
+    - name: IMAGE_DIGEST
+      description: Immutable digest of the built image.
+      value: $(tasks.build-image.results.IMAGE_DIGEST)
