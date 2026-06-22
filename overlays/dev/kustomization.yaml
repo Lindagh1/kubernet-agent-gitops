@@ -10,4 +10,4 @@ resources:
 images:
   - name: ai-agent
     newName: image-registry.openshift-image-registry.svc:5000/wksp-user1-dev/ai-agent
-    digest: sha256:385d7156686a9ca2f0473553bfda3e1d5cbd1a989b177400735158bbc2e8e6d1
+    digest: sha256:185a0310638983cdf69eaf81d395097a3c5103fcc934541d88052af553633a4d
