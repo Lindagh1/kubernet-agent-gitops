@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+namespace: wksp-user1-prod
+
+resources:
+  - ../../base
+  - configmap.yaml
+  - servicemonitor.yaml
+
+images:
+  - name: ai-agent
+    newName: image-registry.openshift-image-registry.svc:5000/wksp-user1-dev/ai-agent
+    digest: sha256:86a959f9739e0f2de5e75e474a9870f805fdc6b60bffe4e16641ad6a8fa7a348
