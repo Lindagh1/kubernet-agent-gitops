@@ -1,0 +1,18 @@
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: ai-agent
+  labels:
+    app.kubernetes.io/name: ai-agent
+    app.kubernetes.io/part-of: openshift-ai-agent
+    app.kubernetes.io/environment: stage
+spec:
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: ai-agent
+      app.kubernetes.io/part-of: openshift-ai-agent
+  endpoints:
+    - port: metrics
+      path: /metrics
+      interval: 30s
+      scrapeTimeout: 10s

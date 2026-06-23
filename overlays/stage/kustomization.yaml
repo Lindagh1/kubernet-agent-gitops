@@ -6,6 +6,7 @@ namespace: wksp-user1-stage
 resources:
   - ../../base
   - configmap.yaml
+  - servicemonitor.yaml
 
 images:
   - name: ai-agent
