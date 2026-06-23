@@ -1,0 +1,34 @@
+apiVersion: tekton.dev/v1
+kind: PipelineRun
+metadata:
+  generateName: ai-agent-build-
+  namespace: wksp-user1-cicd
+  labels:
+    app.kubernetes.io/name: ai-agent
+    app.kubernetes.io/part-of: openshift-ai-agent
+spec:
+  pipelineRef:
+    name: ai-agent-build
+
+  taskRunTemplate:
+    serviceAccountName: pipeline
+
+  params:
+    - name: GIT_URL
+      value: https://github.com/Lindagh1/kubernet-agent.git
+
+    - name: GIT_REVISION
+      value: main
+
+    - name: IMAGE
+      value: image-registry.openshift-image-registry.svc:5000/wksp-user1-dev/ai-agent:pipeline-latest
+
+  workspaces:
+    - name: shared-workspace
+      volumeClaimTemplate:
+        spec:
+          accessModes:
+            - ReadWriteOnce
+          resources:
+            requests:
+              storage: 1Gi
